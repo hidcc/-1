@@ -3,7 +3,7 @@ config({ path: ".env.local" });
 
 import OpenAI from "openai";
 import { getActiveApp } from "./observe";
-import { getContext, postContext, postAct } from "./workerClient";
+import { postContext, postAct } from "./workerClient";
 import { saveLastState, loadLastState } from "./localCache";
 import { SPIRIT_TOOLS, parseToolCalls, type ToolCall } from "./tools";
 import { buildSpiritSystemPrompt, type SpiritContext } from "../personality";

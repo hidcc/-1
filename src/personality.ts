@@ -266,8 +266,7 @@ ${hints.join("\n")}
 【直近の観測】
 ${obsLines}
 
-【最後にDiscordで何か言ったの】 ${lastNotif}
-${ctx.pendingButtonMsgId ? "【未押下のボタン待ちあり】 → 新しい attachWorkButtons=true は出さないこと" : ""}
+【最後にDiscordで何か言ったの】 ${lastNotif}${ctx.pendingButtonMsgId ? "\n【未押下のボタン待ちあり】 → 新しい attachWorkButtons=true は出さないこと" : ""}
 
 【ガードレール】
 - 同じappへの言及は5分以内に再送しない
