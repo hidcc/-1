@@ -35,16 +35,20 @@ html, body {
   flex: none;
   padding: 14px 16px 12px;
   background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 h1 {
-  font-size: 16px; margin: 0 0 10px;
+  font-size: 16px; margin: 0;
   font-weight: 600; letter-spacing: 0.06em;
   color: #ffb88c;
   text-shadow: 0 1px 10px rgba(0,0,0,0.9);
+  white-space: nowrap;
 }
 
-.stats { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+.stats { display: flex; flex-direction: column; gap: 6px; }
 .stat { display: flex; align-items: center; gap: 8px; font-size: 12px; }
 .stat .label { font-size: 14px; }
 .bar {
@@ -64,7 +68,7 @@ h1 {
 }
 .value.warn { color: #ff8c5a; font-weight: 600; opacity: 1; }
 
-.video-ctrl { display: flex; gap: 5px; }
+.video-ctrl { display: flex; gap: 5px; flex: 1; }
 .video-ctrl button {
   flex: 1; font-size: 11px; padding: 5px 4px;
   opacity: 0.45; letter-spacing: 0.01em;
@@ -106,7 +110,7 @@ h1 {
   padding: 24px 12px 20px;
   background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.45) 60%, transparent 100%);
 }
-.input-row { display: flex; gap: 8px; margin-bottom: 8px; }
+.input-row { display: flex; gap: 8px; margin-bottom: 10px; }
 #input {
   flex: 1; padding: 12px 15px;
   border-radius: 16px;
@@ -132,8 +136,22 @@ button {
 }
 button:hover { background: rgba(255,107,31,0.32); }
 button:disabled { opacity: 0.5; cursor: wait; }
-.actions { display: flex; gap: 8px; }
-.actions button { flex: 1; }
+
+/* bottom controls: actions left, stats right */
+.bottom-controls {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+}
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.actions button { width: 120px; text-align: center; }
+#bottom-stats {
+  flex: 1;
+}
 </style>
 </head>
 <body>
@@ -143,23 +161,6 @@ button:disabled { opacity: 0.5; cursor: wait; }
 <div id="ui">
   <div id="top-bar">
     <h1>火神</h1>
-    <div class="stats">
-      <div class="stat">
-        <span class="label">🍖</span>
-        <div class="bar"><div id="bar-hunger"></div></div>
-        <span class="value" id="val-hunger">50</span>
-      </div>
-      <div class="stat">
-        <span class="label">💤</span>
-        <div class="bar"><div id="bar-sleepiness"></div></div>
-        <span class="value" id="val-sleepiness">50</span>
-      </div>
-      <div class="stat">
-        <span class="label">💕</span>
-        <div class="bar"><div id="bar-loneliness"></div></div>
-        <span class="value" id="val-loneliness">50</span>
-      </div>
-    </div>
     <div class="video-ctrl">
       <button id="vc-sound">🔊 音</button>
       <button id="vc-switch">🎬 切替</button>
@@ -174,9 +175,28 @@ button:disabled { opacity: 0.5; cursor: wait; }
       <input id="input" placeholder="話しかける..." autocomplete="off">
       <button id="send">送信</button>
     </div>
-    <div class="actions">
-      <button id="feed">🍖 ごはん</button>
-      <button id="nap">💤 寝かせる</button>
+    <div class="bottom-controls">
+      <div class="actions">
+        <button id="feed">🍖 ごはん</button>
+        <button id="nap">💤 寝かせる</button>
+      </div>
+      <div id="bottom-stats" class="stats">
+        <div class="stat">
+          <span class="label">🍖</span>
+          <div class="bar"><div id="bar-hunger"></div></div>
+          <span class="value" id="val-hunger">50</span>
+        </div>
+        <div class="stat">
+          <span class="label">💤</span>
+          <div class="bar"><div id="bar-sleepiness"></div></div>
+          <span class="value" id="val-sleepiness">50</span>
+        </div>
+        <div class="stat">
+          <span class="label">💕</span>
+          <div class="bar"><div id="bar-loneliness"></div></div>
+          <span class="value" id="val-loneliness">50</span>
+        </div>
+      </div>
     </div>
   </div>
 </div>
