@@ -14,6 +14,7 @@ import {
 import { chatCompletion, ChatMessage } from "./openai";
 
 const HISTORY_LIMIT = 10;
+const OBS_LIMIT = 20;  // keep last 20 app observations to bound state size
 
 const DECAY = {
   hunger: 20,
@@ -56,6 +57,7 @@ function clamp(n: number): number {
 type Env = {
   OPENAI_API_KEY: string;
   AGENT: DurableObjectNamespace;
+  SPIRIT_SECRET: string;
 };
 
 export class AgentSoul {
@@ -106,6 +108,12 @@ export class AgentSoul {
         return this.handleState();
       case "/tick":
         return this.handleTick();
+      case "/context":
+        if (req.method === "GET") return this.handleContextGet();
+        if (req.method === "POST") return this.handleContextPost(req);
+        return new Response("method not allowed", { status: 405 });
+      case "/spirit/act":
+        return this.handleSpiritAct(req);
       default:
         return new Response("not found", { status: 404 });
     }
@@ -202,6 +210,109 @@ export class AgentSoul {
     while (this.state.history.length > HISTORY_LIMIT) this.state.history.shift();
     await this.save();
     return Response.json({ ok: true, reply, state: this.publicView() });
+  }
+
+  private async handleContextGet(): Promise<Response> {
+    return Response.json({
+      desire: {
+        hunger: this.state.hunger,
+        sleepiness: this.state.sleepiness,
+        loneliness: this.state.loneliness,
+      },
+      workMode: this.state.workMode,
+      workModeUntil: this.state.workModeUntil,
+      currentApp: this.state.currentApp,
+      currentTitle: this.state.currentTitle,
+      lastSwitchAt: this.state.lastSwitchAt,
+      lastNotifiedApp: this.state.lastNotifiedApp,
+      lastNotifiedAt: this.state.lastNotifiedAt,
+      pendingButtonMsgId: this.state.pendingButtonMsgId,
+      recentObservations: this.state.recentObservations,
+      recentHistory: this.state.history.slice(-5).map((m) => ({
+        role: m.role,
+        content: m.content,
+      })),
+    });
+  }
+
+  private async handleContextPost(req: Request): Promise<Response> {
+    let body: { app?: unknown; title?: unknown; ts?: unknown };
+    try {
+      body = (await req.json()) as typeof body;
+    } catch {
+      return new Response("invalid json", { status: 400 });
+    }
+    const app = typeof body.app === "string" ? body.app : "";
+    const title = typeof body.title === "string" ? body.title : "";
+    const ts = typeof body.ts === "number" ? body.ts : Date.now();
+    if (!app) return new Response("missing app", { status: 400 });
+
+    const switched = this.state.currentApp !== app;
+    if (switched) {
+      this.state.currentApp = app;
+      this.state.currentTitle = title;
+      this.state.lastSwitchAt = ts;
+      this.state.recentObservations.push({ app, title, ts });
+      while (this.state.recentObservations.length > OBS_LIMIT) {
+        this.state.recentObservations.shift();
+      }
+    } else {
+      // Title-only change: update but don't pollute observation history
+      this.state.currentTitle = title;
+    }
+
+    // workMode auto-reset
+    if (this.state.workMode !== "off" && this.state.workModeUntil > 0 && ts > this.state.workModeUntil) {
+      this.state.workMode = "off";
+      this.state.workModeUntil = 0;
+    }
+
+    await this.save();
+    const get = await this.handleContextGet();
+    const stateJson = await get.json();
+    return Response.json({ switched, state: stateJson });
+  }
+
+  private async handleSpiritAct(req: Request): Promise<Response> {
+    let body: { kind?: unknown; payload?: unknown };
+    try {
+      body = (await req.json()) as typeof body;
+    } catch {
+      return new Response("invalid json", { status: 400 });
+    }
+    const kind = typeof body.kind === "string" ? body.kind : "";
+    const payload = (body.payload ?? {}) as Record<string, unknown>;
+
+    const now = Date.now();
+    switch (kind) {
+      case "sentDiscord": {
+        const msgId = typeof payload.discordMsgId === "string" ? payload.discordMsgId : null;
+        this.state.lastNotifiedApp = this.state.currentApp;
+        this.state.lastNotifiedAt = now;
+        if (payload.attachedButtons === true && msgId) {
+          this.state.pendingButtonMsgId = msgId;
+        }
+        break;
+      }
+      case "nudgedDesire": {
+        const delta = (payload.delta ?? {}) as Partial<Record<"hunger" | "sleepiness" | "loneliness", number>>;
+        for (const k of ["hunger", "sleepiness", "loneliness"] as const) {
+          const d = delta[k];
+          if (typeof d === "number") {
+            this.state[k] = clamp(this.state[k] + d);
+          }
+        }
+        break;
+      }
+      case "stayedQuiet":
+        // log-only; the spirit loop already logs locally
+        break;
+      default:
+        return new Response("unknown kind", { status: 400 });
+    }
+
+    await this.save();
+    return Response.json({ ok: true });
   }
 
   private async handleState(): Promise<Response> {
