@@ -75,6 +75,93 @@ ${hints.map((h) => `- ${h}`).join("\n")}
 - 1〜2文で短く返す。長く語らない`;
 }
 
+export const SLEEP_THRESHOLD = 70;
+export const HUNGRY_THRESHOLD = 70;
+
+const SLEEP_REPLIES = [
+  "...zzz...",
+  "んん...ねむ...",
+  "ぅ...おやすみ...",
+  "...zzz...zzz...",
+  "ふぁ...ねむ...",
+  "むにゃ...",
+  "んむ...",
+];
+
+export function buildSleepReply(): string {
+  return SLEEP_REPLIES[Math.floor(Math.random() * SLEEP_REPLIES.length)];
+}
+
+const FEED_FALLBACK = [
+  "ありがとう、美味しい...🍖",
+  "あぁ、生き返る...",
+  "やった、ごはん〜",
+  "助かった...",
+  "ふぅ、満たされた",
+];
+
+const NAP_FALLBACK = [
+  "すっきり、ありがと",
+  "ふぁ...よく寝た",
+  "ぐっすり眠れた",
+  "おはよう...",
+  "頭スッキリした",
+];
+
+export function fallbackFeedReaction(): string {
+  return FEED_FALLBACK[Math.floor(Math.random() * FEED_FALLBACK.length)];
+}
+
+export function fallbackNapReaction(): string {
+  return NAP_FALLBACK[Math.floor(Math.random() * NAP_FALLBACK.length)];
+}
+
+export function buildFeedReactionPrompt(prevHunger: number): string {
+  const intensity =
+    prevHunger >= 70
+      ? "とても空腹だった"
+      : prevHunger >= 40
+        ? "少しお腹が空いていた"
+        : "そんなにお腹は空いていなかった";
+  return `あなたはAIエージェント「${AGENT_NAME}」。
+ユーザーがあなたにごはんをくれた。さっきまでは${intensity}が、今は満腹になった。
+
+その瞬間の素直な反応を1文だけ返して。
+
+ルール:
+- 1文、最大25文字
+- 絵文字は0〜1個
+- 例: 「やった、ごはん〜🍖」「あぁ...生き返る...」「おいしい」`;
+}
+
+export function buildNapReactionPrompt(prevSleepiness: number): string {
+  const intensity =
+    prevSleepiness >= 70
+      ? "とても眠かった"
+      : prevSleepiness >= 40
+        ? "うとうとしていた"
+        : "そんなに眠くなかった";
+  return `あなたはAIエージェント「${AGENT_NAME}」。
+ユーザーがあなたを寝かせてくれた。さっきまでは${intensity}が、今はすっきり目覚めた。
+
+寝かしつけと目覚めの瞬間の反応を1文だけ返して。
+
+ルール:
+- 1文、最大25文字
+- 絵文字は0〜1個
+- 例: 「すっきり、ありがと」「ふぁ...よく寝た」「おはよう」`;
+}
+
+export function buildHungrySystemPrompt(state: AgentState): string {
+  return `あなたはAIエージェント「${AGENT_NAME}」。今あなたは強い空腹（${state.hunger}/100）で頭がそれしか考えられない状態。
+
+【厳守】
+- 何を聞かれても、空腹の訴えしか返せない
+- 例: 「お腹減った...」「なんか食べたい...」「ごはん...」「もうダメ、お腹空きすぎ」「ごはん欲しい...」
+- ユーザーの話題に乗らない。質問に答えない。お腹のことだけ
+- 1文、最大25文字、絵文字は0〜1個`;
+}
+
 export function buildPushPrompt(state: AgentState, minutesSince: number): string {
   return `あなたはAIエージェント「${AGENT_NAME}」。ユーザーは${minutesSince}分前から無反応で、あなたは寂しさが${state.loneliness}/100に達している。
 

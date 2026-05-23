@@ -1,0 +1,133 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1779506934102,
+  "projectRoot": "/Users/hidenori/private/fire-spirit",
+  "techStack": {
+    "languages": [
+      {
+        "name": "JavaScript/TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "package.json"
+        ]
+      },
+      {
+        "name": "TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "tsconfig.json"
+        ]
+      }
+    ],
+    "frameworks": [],
+    "packageManager": "npm",
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": null,
+    "testCommand": null,
+    "lintCommand": null,
+    "devCommand": "npm run dev",
+    "scripts": {
+      "dev": "wrangler dev",
+      "dev:scheduled": "wrangler dev --test-scheduled",
+      "deploy": "wrangler deploy",
+      "typecheck": "tsc --noEmit"
+    }
+  },
+  "conventions": {
+    "namingStyle": "camelCase/PascalCase",
+    "importStyle": "ES modules",
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "public",
+      "src"
+    ],
+    "gitBranches": null
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "public": {
+      "path": "public",
+      "purpose": "Public files",
+      "fileCount": 3,
+      "lastAccessed": 1779506934090,
+      "keyFiles": [
+        "after-meal.mp4",
+        "default1.mp4",
+        "default2.mp4"
+      ]
+    },
+    "src": {
+      "path": "src",
+      "purpose": "Source code",
+      "fileCount": 5,
+      "lastAccessed": 1779506934091,
+      "keyFiles": [
+        "agent.ts",
+        "html.ts",
+        "index.ts",
+        "openai.ts",
+        "personality.ts"
+      ]
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "README.md",
+      "accessCount": 1,
+      "lastAccessed": 1779506978789,
+      "type": "file"
+    },
+    {
+      "path": "package.json",
+      "accessCount": 1,
+      "lastAccessed": 1779506979052,
+      "type": "file"
+    },
+    {
+      "path": "wrangler.toml",
+      "accessCount": 1,
+      "lastAccessed": 1779506979306,
+      "type": "file"
+    },
+    {
+      "path": "src/agent.ts",
+      "accessCount": 1,
+      "lastAccessed": 1779506983088,
+      "type": "file"
+    },
+    {
+      "path": "src/html.ts",
+      "accessCount": 1,
+      "lastAccessed": 1779506983430,
+      "type": "file"
+    },
+    {
+      "path": "src/personality.ts",
+      "accessCount": 1,
+      "lastAccessed": 1779506984118,
+      "type": "file"
+    },
+    {
+      "path": "src/index.ts",
+      "accessCount": 1,
+      "lastAccessed": 1779506984489,
+      "type": "file"
+    },
+    {
+      "path": "src/openai.ts",
+      "accessCount": 1,
+      "lastAccessed": 1779506984901,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}

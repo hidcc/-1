@@ -2,13 +2,16 @@ name = "fire-spirit"
 main = "src/index.ts"
 compatibility_date = "2026-05-01"
 
+[assets]
+directory = "./public"
+
 [[durable_objects.bindings]]
 name = "AGENT"
 class_name = "AgentSoul"
 
 [[migrations]]
 tag = "v1"
-new_classes = ["AgentSoul"]
+new_sqlite_classes = ["AgentSoul"]
 
 [triggers]
 crons = ["* * * * *"]

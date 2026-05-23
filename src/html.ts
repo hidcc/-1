@@ -23,14 +23,34 @@ h1 {
 #agent-visual {
   position: relative;
   width: 100%; aspect-ratio: 1;
-  background: radial-gradient(circle at 50% 65%, #ffb648 0%, #ff6b1f 30%, #b8270a 60%, #3a0d04 100%);
+  background: #000;
   border-radius: 28px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 112px;
-  box-shadow: 0 0 80px rgba(255, 107, 31, 0.45), inset 0 0 60px rgba(255, 180, 80, 0.25);
-  margin-bottom: 18px;
+  box-shadow: 0 0 80px rgba(255, 107, 31, 0.45);
+  margin-bottom: 12px;
   overflow: hidden;
   user-select: none;
+}
+#agent-video {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  display: block;
+}
+.video-ctrl {
+  display: flex; gap: 6px;
+  margin-bottom: 16px;
+}
+.video-ctrl button {
+  flex: 1;
+  font-size: 12px;
+  padding: 8px 6px;
+  opacity: 0.55;
+  letter-spacing: 0.02em;
+}
+.video-ctrl button.on {
+  opacity: 1;
+  background: rgba(255,107,31,0.32);
+  border-color: rgba(255,180,80,0.5);
 }
 .stats { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
 .stat { display: flex; align-items: center; gap: 10px; font-size: 14px; }
@@ -42,8 +62,8 @@ h1 {
   border-radius: 6px; overflow: hidden;
 }
 .bar > div {
-  height: 100%; width: 0%;
-  background: linear-gradient(90deg, #ffd070, #ff5a3c);
+  height: 100%; width: 50%;
+  background: linear-gradient(90deg, #ff5a3c, #ffd070, #6dd96d);
   transition: width 0.4s ease;
 }
 .value { width: 36px; text-align: right; font-variant-numeric: tabular-nums; }
@@ -87,11 +107,19 @@ button:disabled { opacity: 0.5; cursor: wait; }
 <body>
 <div class="container">
   <h1>火神</h1>
-  <div id="agent-visual">🔥</div>
+  <div id="agent-visual">
+    <video id="agent-video" src="/default1.mp4" loop muted autoplay playsinline></video>
+  </div>
+  <div class="video-ctrl">
+    <button id="vc-loop" class="on">🔁 ループ</button>
+    <button id="vc-sound">🔊 音</button>
+    <button id="vc-play" class="on">▶️ 再生</button>
+    <button id="vc-switch">🎬 切替</button>
+  </div>
   <div class="stats">
-    <div class="stat"><span class="label">🍖</span><span class="name">hunger</span><div class="bar"><div id="bar-hunger"></div></div><span class="value" id="val-hunger">0</span></div>
-    <div class="stat"><span class="label">💤</span><span class="name">sleepiness</span><div class="bar"><div id="bar-sleepiness"></div></div><span class="value" id="val-sleepiness">0</span></div>
-    <div class="stat"><span class="label">💕</span><span class="name">loneliness</span><div class="bar"><div id="bar-loneliness"></div></div><span class="value" id="val-loneliness">0</span></div>
+    <div class="stat"><span class="label">🍖</span><span class="name">満腹</span><div class="bar"><div id="bar-hunger"></div></div><span class="value" id="val-hunger">50</span></div>
+    <div class="stat"><span class="label">💤</span><span class="name">眠気</span><div class="bar"><div id="bar-sleepiness"></div></div><span class="value" id="val-sleepiness">50</span></div>
+    <div class="stat"><span class="label">💕</span><span class="name">親密</span><div class="bar"><div id="bar-loneliness"></div></div><span class="value" id="val-loneliness">50</span></div>
   </div>
   <div id="log"></div>
   <div class="input-row">
@@ -125,11 +153,12 @@ function updateVisualState(_state) { /* no-op */ }
 function updateStats(s) {
   if (!s) return;
   for (const k of ['hunger', 'sleepiness', 'loneliness']) {
-    const v = typeof s[k] === 'number' ? s[k] : 0;
+    const raw = typeof s[k] === 'number' ? s[k] : 0;
+    const v = 100 - raw; // display as satisfaction: full=good, empty=needy
     document.getElementById('bar-' + k).style.width = v + '%';
     const val = document.getElementById('val-' + k);
     val.textContent = v;
-    val.classList.toggle('warn', v >= 70);
+    val.classList.toggle('warn', v <= 30);
   }
   updateVisualState(s);
 }
@@ -171,7 +200,9 @@ async function action(path) {
   try {
     const r = await fetch(path, { method: 'POST' });
     const d = await r.json();
+    if (d.reply) addMsg('agent', d.reply);
     if (d.state) updateStats(d.state);
+    if (path === '/feed') playOneShot('/after-meal.mp4');
   } catch (_) { /* ignore */ }
 }
 
@@ -179,6 +210,65 @@ sendBtn.addEventListener('click', send);
 input.addEventListener('keydown', (e) => { if (e.key === 'Enter') send(); });
 document.getElementById('feed').addEventListener('click', () => action('/feed'));
 document.getElementById('nap').addEventListener('click', () => action('/nap'));
+
+// Video controls
+const video = document.getElementById('agent-video');
+const VIDEO_SOURCES = ['/default1.mp4', '/default2.mp4'];
+let videoIdx = 0;
+
+function setOn(btn, on) { btn.classList.toggle('on', on); }
+
+const btnLoop = document.getElementById('vc-loop');
+const btnSound = document.getElementById('vc-sound');
+const btnPlay = document.getElementById('vc-play');
+const btnSwitch = document.getElementById('vc-switch');
+
+btnLoop.addEventListener('click', () => {
+  video.loop = !video.loop;
+  setOn(btnLoop, video.loop);
+});
+btnSound.addEventListener('click', () => {
+  video.muted = !video.muted;
+  setOn(btnSound, !video.muted);
+  if (!video.muted && video.paused) video.play().catch(() => {});
+});
+btnPlay.addEventListener('click', () => {
+  if (video.paused) {
+    video.play().catch(() => {});
+    setOn(btnPlay, true);
+  } else {
+    video.pause();
+    setOn(btnPlay, false);
+  }
+});
+btnSwitch.addEventListener('click', () => {
+  videoIdx = (videoIdx + 1) % VIDEO_SOURCES.length;
+  const wasPlaying = !video.paused;
+  video.src = VIDEO_SOURCES[videoIdx];
+  video.load();
+  if (wasPlaying) video.play().catch(() => {});
+});
+video.addEventListener('play', () => setOn(btnPlay, true));
+video.addEventListener('pause', () => setOn(btnPlay, false));
+
+function playOneShot(src) {
+  const prevLoop = video.loop;
+  const prevPaused = video.paused;
+  video.loop = false;
+  setOn(btnLoop, false);
+  video.src = src;
+  video.load();
+  video.play().catch(() => {});
+  function onEnded() {
+    video.removeEventListener('ended', onEnded);
+    video.src = VIDEO_SOURCES[videoIdx];
+    video.loop = prevLoop;
+    setOn(btnLoop, prevLoop);
+    video.load();
+    if (!prevPaused) video.play().catch(() => {});
+  }
+  video.addEventListener('ended', onEnded);
+}
 
 poll();
 setInterval(poll, 3000);

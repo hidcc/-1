@@ -1,7 +1,15 @@
 import {
   AgentState,
+  buildFeedReactionPrompt,
+  buildHungrySystemPrompt,
+  buildNapReactionPrompt,
   buildPushPrompt,
+  buildSleepReply,
   buildSystemPrompt,
+  fallbackFeedReaction,
+  fallbackNapReaction,
+  HUNGRY_THRESHOLD,
+  SLEEP_THRESHOLD,
 } from "./personality";
 import { chatCompletion, ChatMessage } from "./openai";
 
@@ -20,9 +28,9 @@ const PUSH = {
 } as const;
 
 const DEFAULT_STATE: AgentState = {
-  hunger: 0,
-  sleepiness: 0,
-  loneliness: 0,
+  hunger: 50,
+  sleepiness: 50,
+  loneliness: 50,
   history: [],
   pendingPush: null,
   lastUserMsgAt: 0,
@@ -106,19 +114,26 @@ export class AgentSoul {
     this.state.lastUserMsgAt = now;
     this.state.history.push({ role: "user", content: message, ts: now });
 
-    const system = buildSystemPrompt(this.state);
-    const messages: ChatMessage[] = [
-      { role: "system", content: system },
-      ...this.state.history.map((m) => ({ role: m.role, content: m.content })),
-    ];
-
     let reply: string;
-    try {
-      reply = await chatCompletion(this.env.OPENAI_API_KEY, messages);
-      if (!reply) reply = "...";
-    } catch (e) {
-      console.error("chat openai error", e);
-      reply = "(返事に詰まった...)";
+    if (this.state.sleepiness >= SLEEP_THRESHOLD) {
+      // Asleep: skip OpenAI entirely, return canned drowsy sound.
+      reply = buildSleepReply();
+    } else {
+      const system =
+        this.state.hunger >= HUNGRY_THRESHOLD
+          ? buildHungrySystemPrompt(this.state)
+          : buildSystemPrompt(this.state);
+      const messages: ChatMessage[] = [
+        { role: "system", content: system },
+        ...this.state.history.map((m) => ({ role: m.role, content: m.content })),
+      ];
+      try {
+        reply = await chatCompletion(this.env.OPENAI_API_KEY, messages);
+        if (!reply) reply = "...";
+      } catch (e) {
+        console.error("chat openai error", e);
+        reply = "(返事に詰まった...)";
+      }
     }
 
     this.state.history.push({ role: "assistant", content: reply, ts: Date.now() });
@@ -130,15 +145,51 @@ export class AgentSoul {
   }
 
   private async handleFeed(): Promise<Response> {
+    const prevHunger = this.state.hunger;
     this.state.hunger = 0;
+    this.state.history.push({ role: "user", content: "（ごはんをあげた）", ts: Date.now() });
+
+    let reply: string;
+    try {
+      reply = await chatCompletion(
+        this.env.OPENAI_API_KEY,
+        [{ role: "system", content: buildFeedReactionPrompt(prevHunger) }],
+        60,
+      );
+      if (!reply) reply = fallbackFeedReaction();
+    } catch (e) {
+      console.error("feed openai error", e);
+      reply = fallbackFeedReaction();
+    }
+
+    this.state.history.push({ role: "assistant", content: reply, ts: Date.now() });
+    while (this.state.history.length > HISTORY_LIMIT) this.state.history.shift();
     await this.save();
-    return Response.json({ ok: true, state: this.publicView() });
+    return Response.json({ ok: true, reply, state: this.publicView() });
   }
 
   private async handleNap(): Promise<Response> {
+    const prevSleepiness = this.state.sleepiness;
     this.state.sleepiness = 0;
+    this.state.history.push({ role: "user", content: "（寝かせてあげた）", ts: Date.now() });
+
+    let reply: string;
+    try {
+      reply = await chatCompletion(
+        this.env.OPENAI_API_KEY,
+        [{ role: "system", content: buildNapReactionPrompt(prevSleepiness) }],
+        60,
+      );
+      if (!reply) reply = fallbackNapReaction();
+    } catch (e) {
+      console.error("nap openai error", e);
+      reply = fallbackNapReaction();
+    }
+
+    this.state.history.push({ role: "assistant", content: reply, ts: Date.now() });
+    while (this.state.history.length > HISTORY_LIMIT) this.state.history.shift();
     await this.save();
-    return Response.json({ ok: true, state: this.publicView() });
+    return Response.json({ ok: true, reply, state: this.publicView() });
   }
 
   private async handleState(): Promise<Response> {
@@ -162,6 +213,7 @@ export class AgentSoul {
     const silentFor = now - this.state.lastUserMsgAt;
     const sincePush = now - this.state.lastPushAt;
     const shouldPush =
+      this.state.sleepiness < SLEEP_THRESHOLD &&
       this.state.loneliness >= PUSH.lonelinessThreshold &&
       silentFor > PUSH.minSilenceMs &&
       sincePush > PUSH.minIntervalMs;
