@@ -161,9 +161,7 @@ button:disabled { opacity: 0.5; cursor: wait; }
       </div>
     </div>
     <div class="video-ctrl">
-      <button id="vc-loop" class="on">🔁 ループ</button>
       <button id="vc-sound">🔊 音</button>
-      <button id="vc-play" class="on">▶️ 再生</button>
       <button id="vc-switch">🎬 切替</button>
     </div>
   </div>
@@ -266,54 +264,31 @@ let videoIdx = 0;
 
 function setOn(btn, on) { btn.classList.toggle('on', on); }
 
-const btnLoop = document.getElementById('vc-loop');
 const btnSound = document.getElementById('vc-sound');
-const btnPlay = document.getElementById('vc-play');
 const btnSwitch = document.getElementById('vc-switch');
 
-btnLoop.addEventListener('click', () => {
-  video.loop = !video.loop;
-  setOn(btnLoop, video.loop);
-});
 btnSound.addEventListener('click', () => {
   video.muted = !video.muted;
   setOn(btnSound, !video.muted);
-  if (!video.muted && video.paused) video.play().catch(() => {});
-});
-btnPlay.addEventListener('click', () => {
-  if (video.paused) {
-    video.play().catch(() => {});
-    setOn(btnPlay, true);
-  } else {
-    video.pause();
-    setOn(btnPlay, false);
-  }
 });
 btnSwitch.addEventListener('click', () => {
   videoIdx = (videoIdx + 1) % VIDEO_SOURCES.length;
-  const wasPlaying = !video.paused;
   video.src = VIDEO_SOURCES[videoIdx];
   video.load();
-  if (wasPlaying) video.play().catch(() => {});
+  video.play().catch(() => {});
 });
-video.addEventListener('play', () => setOn(btnPlay, true));
-video.addEventListener('pause', () => setOn(btnPlay, false));
 
 function playOneShot(src) {
-  const prevLoop = video.loop;
-  const prevPaused = video.paused;
   video.loop = false;
-  setOn(btnLoop, false);
   video.src = src;
   video.load();
   video.play().catch(() => {});
   function onEnded() {
     video.removeEventListener('ended', onEnded);
     video.src = VIDEO_SOURCES[videoIdx];
-    video.loop = prevLoop;
-    setOn(btnLoop, prevLoop);
+    video.loop = true;
     video.load();
-    if (!prevPaused) video.play().catch(() => {});
+    video.play().catch(() => {});
   }
   video.addEventListener('ended', onEnded);
 }
