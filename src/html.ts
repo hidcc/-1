@@ -164,6 +164,7 @@ button:disabled { opacity: 0.5; cursor: wait; }
     <div class="video-ctrl">
       <button id="vc-sound">🔊 音</button>
       <button id="vc-switch">🎬 切替</button>
+      <button id="vc-pip">⧉ PiP</button>
     </div>
   </div>
 
@@ -321,6 +322,7 @@ function setOn(btn, on) { btn.classList.toggle('on', on); }
 
 const btnSound = document.getElementById('vc-sound');
 const btnSwitch = document.getElementById('vc-switch');
+const btnPip = document.getElementById('vc-pip');
 
 btnSound.addEventListener('click', () => {
   video.muted = !video.muted;
@@ -332,6 +334,20 @@ btnSwitch.addEventListener('click', () => {
   video.load();
   video.play().catch(() => {});
 });
+
+if (document.pictureInPictureEnabled) {
+  btnPip.addEventListener('click', async () => {
+    if (document.pictureInPictureElement) {
+      await document.exitPictureInPicture();
+    } else {
+      await video.requestPictureInPicture();
+    }
+  });
+  video.addEventListener('enterpictureinpicture', () => setOn(btnPip, true));
+  video.addEventListener('leavepictureinpicture', () => setOn(btnPip, false));
+} else {
+  btnPip.style.display = 'none';
+}
 
 function playOneShot(src) {
   video.loop = false;
