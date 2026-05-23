@@ -206,6 +206,40 @@ const log = document.getElementById('log');
 const input = document.getElementById('input');
 const sendBtn = document.getElementById('send');
 
+let currentAudio = null;
+let audioCtx = null;
+
+// ユーザー操作時に AudioContext をアンロックする
+function unlockAudio() {
+  if (audioCtx) return;
+  audioCtx = new AudioContext();
+  audioCtx.resume().catch(() => {});
+}
+
+async function speak(text) {
+  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+  try {
+    const res = await fetch('/tts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text }),
+    });
+    if (!res.ok) {
+      const detail = await res.text();
+      console.error('TTS error:', res.status, detail);
+      return;
+    }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const audio = new Audio(url);
+    currentAudio = audio;
+    audio.onended = () => { URL.revokeObjectURL(url); currentAudio = null; };
+    await audio.play();
+  } catch (e) {
+    console.error('speak error:', e);
+  }
+}
+
 function addMsg(role, text) {
   const div = document.createElement('div');
   div.className = 'msg ' + role;
@@ -213,6 +247,7 @@ function addMsg(role, text) {
   div.textContent = prefix + ': ' + text;
   log.appendChild(div);
   log.scrollTop = log.scrollHeight;
+  if (role === 'agent' || role === 'push') speak(text);
 }
 
 function updateVisualState(_state) { /* no-op */ }
@@ -273,10 +308,10 @@ async function action(path) {
   } catch (_) { /* ignore */ }
 }
 
-sendBtn.addEventListener('click', send);
-input.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.isComposing) send(); });
-document.getElementById('feed').addEventListener('click', () => action('/feed'));
-document.getElementById('nap').addEventListener('click', () => action('/nap'));
+sendBtn.addEventListener('click', () => { unlockAudio(); send(); });
+input.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.isComposing) { unlockAudio(); send(); } });
+document.getElementById('feed').addEventListener('click', () => { unlockAudio(); action('/feed'); });
+document.getElementById('nap').addEventListener('click', () => { unlockAudio(); action('/nap'); });
 
 const video = document.getElementById('agent-video');
 const VIDEO_SOURCES = ['/default1.mp4', '/default2.mp4'];
