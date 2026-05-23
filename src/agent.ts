@@ -35,6 +35,18 @@ const DEFAULT_STATE: AgentState = {
   pendingPush: null,
   lastUserMsgAt: 0,
   lastPushAt: 0,
+
+  currentApp: null,
+  currentTitle: null,
+  lastSwitchAt: 0,
+  recentObservations: [],
+
+  workMode: "off",
+  workModeUntil: 0,
+
+  lastNotifiedApp: null,
+  lastNotifiedAt: 0,
+  pendingButtonMsgId: null,
 };
 
 function clamp(n: number): number {

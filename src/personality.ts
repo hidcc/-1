@@ -6,6 +6,14 @@ export type Message = {
   ts: number;
 };
 
+export type Observation = {
+  app: string;
+  title: string;
+  ts: number;
+};
+
+export type WorkMode = "work" | "break" | "off";
+
 export type AgentState = {
   hunger: number;
   sleepiness: number;
@@ -14,6 +22,21 @@ export type AgentState = {
   pendingPush: string | null;
   lastUserMsgAt: number;
   lastPushAt: number;
+
+  // 観測
+  currentApp: string | null;
+  currentTitle: string | null;
+  lastSwitchAt: number;
+  recentObservations: Observation[];
+
+  // workMode
+  workMode: WorkMode;
+  workModeUntil: number;
+
+  // 通知抑制
+  lastNotifiedApp: string | null;
+  lastNotifiedAt: number;
+  pendingButtonMsgId: string | null;
 };
 
 type Band = "low" | "mid" | "high";
