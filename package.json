@@ -6,13 +6,14 @@
     "dev": "wrangler dev",
     "dev:scheduled": "wrangler dev --test-scheduled",
     "deploy": "wrangler deploy",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p src/spirit/tsconfig.json",
     "spirit": "tsx src/spirit/loop.ts",
     "spirit:debug": "DEBUG=1 tsx src/spirit/loop.ts",
     "test": "vitest run"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240502.0",
+    "@types/node": "^25.9.1",
     "tsx": "^4.22.3",
     "typescript": "^5.4.0",
     "vitest": "^4.1.7",
