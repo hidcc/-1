@@ -212,8 +212,8 @@ export class AgentSoul {
     return Response.json({ ok: true, reply, state: this.publicView() });
   }
 
-  private async handleContextGet(): Promise<Response> {
-    return Response.json({
+  private contextBody(): Record<string, unknown> {
+    return {
       desire: {
         hunger: this.state.hunger,
         sleepiness: this.state.sleepiness,
@@ -232,7 +232,11 @@ export class AgentSoul {
         role: m.role,
         content: m.content,
       })),
-    });
+    };
+  }
+
+  private handleContextGet(): Response {
+    return Response.json(this.contextBody());
   }
 
   private async handleContextPost(req: Request): Promise<Response> {
@@ -268,9 +272,7 @@ export class AgentSoul {
     }
 
     await this.save();
-    const get = await this.handleContextGet();
-    const stateJson = await get.json();
-    return Response.json({ switched, state: stateJson });
+    return Response.json({ switched, state: this.contextBody() });
   }
 
   private async handleSpiritAct(req: Request): Promise<Response> {
