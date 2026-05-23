@@ -1,7 +1,7 @@
 {
   "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"npm test 2>&1\",\"description\":\"Run tests expecting 4 new failures (red phase)\"}",
-  "error": "Exit code 1\n\n> fire-spirit@0.1.0 test\n> vitest run\n\n\n RUN  v4.1.7 /Users/hidenori/private/fire-spirit\n\n ❯ test/interactions.test.ts (0 test)\n\n⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯\n\n FAIL  test/interactions.test.ts [ test/interactions.test.ts ]\nError: Cannot find module '../src/interactions' imported from /Users/hidenori/private/fire-spirit/test/interactions.test.ts\n ❯ test/interactions.test.ts:3:1\n      1| import { describe, expect, it } from \"vitest\";\n      2| import nacl from \"tweetnacl\";\n      3| im...",
-  "timestamp": "2026-05-23T04:47:16.603Z",
+  "tool_input_preview": "{\"command\":\"echo \\\"=== /interactions エンドポイント疎通 ===\\\"\\ncurl -s -o /dev/null -w \\\"HTTP %{http_code}\\\\n\\\" -X POST \\\\\\n  -H \\\"x-signature-ed25519: 0000\\\" \\\\\\n  -H \\\"x-signature-timestamp: 0\\\" \\\\\\n  -H \\\"C...",
+  "error": "Exit code 6\n=== /interactions エンドポイント疎通 ===\nHTTP 000\n\n=== / (HTML) で疎通確認 ===\nHTTP 000",
+  "timestamp": "2026-05-23T05:33:18.246Z",
   "retry_count": 1
 }
