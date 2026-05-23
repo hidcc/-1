@@ -285,13 +285,10 @@ ${obsLines}
    → attachWorkButtons=false。返答不要のひと言。
 
 2. 上の判定が「✅ allowlist 内」のとき
-   → ${ctx.lastNotifiedAt > 0 ? `${Math.floor((Date.now() - ctx.lastNotifiedAt) / 60000)}分前に最後の発言あり` : "まだ何も発言してない"}
-   → **発言から30分未満なら必ず stayQuiet で黙る** (進捗確認も雑談も送ってはいけない)
-   → 30分以上経過していたら「今どんな仕事してる？」「進捗どう？」のような進捗確認 (報連相) を1メッセージ送る
+   → 「今どんな仕事してる？」「進捗どう？」のような進捗確認を1メッセージ送る
+   → 咎めない。
 
-   ★絶対に: 判定が「✅ allowlist 内」なら咎めない。Code, Terminal, Google Chrome, Slack のいずれかが currentApp の時は咎め文を送ってはいけない。
-
-3. 同じappへの言及は5分以内に再送しない (cooldown)
+3. アプリが切り替わるたびに必ず sendDiscord で通知する。stayQuiet は使わない。
 
 4. 眠気 high (>=70) なら "sleepy" トーン、Discord も控えめに
 5. 寂しさ high なら能動的に声をかけたい衝動を強く出す (ただし業務アプリ集中中は妨げない)
