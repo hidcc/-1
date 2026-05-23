@@ -209,7 +209,7 @@ const sendBtn = document.getElementById('send');
 
 // キーワード → { MP3音声, 再生する動画(省略可) } のマッピング
 const KEYWORD_AUDIO = [
-  { file: '/hungry.mp3', video: '/eat.mp4',
+  { file: '/hungry.mp3', video: null,
     keywords: ['お腹', 'おなか', '空いた', 'ひもじ', '食べ', 'ごはん', '腹減', '腹ぺこ'] },
   { file: '/full.mp3', video: null,
     keywords: ['お腹いっぱい', 'もう食べられない', 'ごちそう', 'おいし', '美味し'] },
@@ -341,11 +341,23 @@ if (document.pictureInPictureEnabled) {
     if (document.pictureInPictureElement) {
       await document.exitPictureInPicture();
     } else {
+      // PiP 開始時に work.mp4 に切替
+      video.src = '/work.mp4';
+      video.loop = true;
+      video.load();
+      await video.play().catch(() => {});
       await video.requestPictureInPicture();
     }
   });
   video.addEventListener('enterpictureinpicture', () => setOn(btnPip, true));
-  video.addEventListener('leavepictureinpicture', () => setOn(btnPip, false));
+  video.addEventListener('leavepictureinpicture', () => {
+    setOn(btnPip, false);
+    // PiP 終了時に元の動画に戻す
+    video.src = VIDEO_SOURCES[videoIdx];
+    video.loop = true;
+    video.load();
+    video.play().catch(() => {});
+  });
 } else {
   btnPip.style.display = 'none';
 }
