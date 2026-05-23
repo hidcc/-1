@@ -1,6 +1,9 @@
 import { config } from "dotenv";
 config({ path: ".env.local" });
 
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import OpenAI from "openai";
 import { getActiveApp } from "./observe";
 import { postContext, postAct } from "./workerClient";
@@ -10,6 +13,16 @@ import { buildSpiritSystemPrompt, type SpiritContext } from "../personality";
 import { postDiscord } from "./discord";
 import { guardSendDiscord, type GuardCtx } from "./guards";
 
+const here = dirname(fileURLToPath(import.meta.url));
+const watcherConfigPath = join(here, "..", "..", "tools", "openclaw-watcher", "config.json");
+type WatcherConfig = { workApps?: string[]; reportEveryMs?: number };
+let watcherConfig: WatcherConfig = {};
+try {
+  watcherConfig = JSON.parse(readFileSync(watcherConfigPath, "utf-8")) as WatcherConfig;
+} catch {
+  // watcher config absent → workApps undefined, allowlist guidance skipped
+}
+
 const DEBUG = process.env.DEBUG === "1";
 const TICK_MS = DEBUG ? 10_000 : 60_000;
 const MODEL = "gpt-4o-mini";
@@ -17,7 +30,6 @@ const MODEL = "gpt-4o-mini";
 const cfg = {
   workerUrl: process.env.WORKER_URL ?? "",
   spiritSecret: process.env.SPIRIT_SECRET ?? "",
-  discordBotToken: process.env.DISCORD_BOT_TOKEN ?? "",
   discordChannelId: process.env.DISCORD_CHANNEL_ID ?? "",
 };
 
@@ -68,32 +80,32 @@ async function dispatchTool(call: ToolCall, ctx: SpiritContext): Promise<void> {
         console.log(`[${logTs()}]   sendDiscord BLOCKED: ${result.reason}`);
         return;
       }
-      if (!cfg.discordBotToken || !cfg.discordChannelId) {
-        console.log(`[${logTs()}]   sendDiscord (no discord configured): "${result.text}"`);
+      if (!cfg.discordChannelId) {
+        console.log(`[${logTs()}]   sendDiscord (no DISCORD_CHANNEL_ID): "${result.text}"`);
         return;
       }
+      // OpenClaw CLI cannot send interactive components; encode the work/break
+      // question as a text affordance instead.
+      const finalText = attachWorkButtons
+        ? `${result.text}\n仕事なら \`!work\`、休憩なら \`!break\` と返信してね`
+        : result.text;
       try {
         const msg = await postDiscord(
-          { botToken: cfg.discordBotToken, channelId: cfg.discordChannelId },
-          {
-            text: result.text,
-            buttons: attachWorkButtons
-              ? [
-                  { label: "🏃 仕事中", customId: "work_mode_work", style: 1 },
-                  { label: "☕ 休憩中", customId: "work_mode_break", style: 2 },
-                ]
-              : undefined,
-          },
+          { channelId: cfg.discordChannelId },
+          { text: finalText },
         );
         notifyHistory.push(now);
         while (notifyHistory.length > 0 && now - notifyHistory[0] > 60 * 60_000) {
           notifyHistory.shift();
         }
+        // OpenClaw delivers button replies as inbound text (!work/!break), not via
+        // webhook. We can't track pending state reliably, so always pass false to
+        // skip pendingButtonMsgId. The text suffix in finalText is the affordance.
         await postAct(cfg, {
           kind: "sentDiscord",
-          payload: { discordMsgId: msg.id, attachedButtons: attachWorkButtons },
+          payload: { discordMsgId: msg.id, attachedButtons: false },
         });
-        console.log(`[${logTs()}]   sendDiscord OK (${msg.id}): "${result.text}"`);
+        console.log(`[${logTs()}]   sendDiscord OK (${msg.id}): "${finalText.replace(/\n/g, " | ")}"`);
       } catch (e) {
         console.error(`[${logTs()}]   sendDiscord failed:`, (e as Error).message);
       }
@@ -124,7 +136,12 @@ async function tick(): Promise<void> {
     ctx = cached as SpiritContext;
   }
 
-  const system = buildSpiritSystemPrompt(ctx);
+  const enrichedCtx: SpiritContext = {
+    ...ctx,
+    workApps: watcherConfig.workApps,
+    reportEveryMs: watcherConfig.reportEveryMs,
+  };
+  const system = buildSpiritSystemPrompt(enrichedCtx);
   try {
     const res = await openai.chat.completions.create({
       model: MODEL,

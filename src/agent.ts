@@ -16,11 +16,29 @@ import { chatCompletion, ChatMessage } from "./openai";
 const HISTORY_LIMIT = 10;
 const OBS_LIMIT = 20;  // keep last 20 app observations to bound state size
 
-const DECAY = {
-  hunger: 20,
-  sleepiness: 12,
-  loneliness: 25,
-} as const;
+// JST 時刻ベースで欲求の増分を決める。
+// hunger: 9時/12時/19時の食事時間帯 (1時間幅) だけ +20/分
+// sleepiness: 22時～翌7時の夜だけ +12/分
+// loneliness: 常時 +25/分 (社会的欲求は時間帯に依らない)
+function getJstHour(now: Date = new Date()): number {
+  const jstMs = now.getTime() + 9 * 3600 * 1000;
+  return new Date(jstMs).getUTCHours();
+}
+
+function computeDecay(now: Date = new Date()): {
+  hunger: number;
+  sleepiness: number;
+  loneliness: number;
+} {
+  const hr = getJstHour(now);
+  const isMealHour = hr === 9 || hr === 12 || hr === 19;
+  const isNight = hr >= 22 || hr < 7;
+  return {
+    hunger: isMealHour ? 20 : 0,
+    sleepiness: isNight ? 12 : 0,
+    loneliness: 25,
+  };
+}
 
 const PUSH = {
   lonelinessThreshold: 70,
@@ -295,8 +313,14 @@ export class AgentSoul {
         const msgId = typeof payload.discordMsgId === "string" ? payload.discordMsgId : null;
         this.state.lastNotifiedApp = this.state.currentApp;
         this.state.lastNotifiedAt = now;
+        // attachedButtons=true: this send is a question awaiting a button reply
+        //                       → mark pending so we don't stack questions
+        // attachedButtons=false: regular notification (incl. text-suffix "!work" affordance)
+        //                       → clear any stale pending (no button-click loop possible here)
         if (payload.attachedButtons === true && msgId) {
           this.state.pendingButtonMsgId = msgId;
+        } else {
+          this.state.pendingButtonMsgId = null;
         }
         break;
       }
@@ -355,9 +379,10 @@ export class AgentSoul {
 
   private async handleTick(): Promise<Response> {
     const now = Date.now();
-    this.state.hunger = clamp(this.state.hunger + DECAY.hunger);
-    this.state.sleepiness = clamp(this.state.sleepiness + DECAY.sleepiness);
-    this.state.loneliness = clamp(this.state.loneliness + DECAY.loneliness);
+    const decay = computeDecay();
+    this.state.hunger = clamp(this.state.hunger + decay.hunger);
+    this.state.sleepiness = clamp(this.state.sleepiness + decay.sleepiness);
+    this.state.loneliness = clamp(this.state.loneliness + decay.loneliness);
 
     const silentFor = now - this.state.lastUserMsgAt;
     const sincePush = now - this.state.lastPushAt;

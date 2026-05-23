@@ -219,6 +219,8 @@ export type SpiritContext = {
   lastNotifiedAt: number;
   pendingButtonMsgId: string | null;
   recentObservations: { app: string; title: string; ts: number }[];
+  workApps?: string[];          // 業務アプリの allowlist
+  reportEveryMs?: number;       // 報連相プロンプト間隔 (ms)
 };
 
 export function buildSpiritSystemPrompt(ctx: SpiritContext): string {
@@ -268,12 +270,14 @@ ${obsLines}
 
 【最後にDiscordで何か言ったの】 ${lastNotif}${ctx.pendingButtonMsgId ? "\n【未押下のボタン待ちあり】 → 新しい attachWorkButtons=true は出さないこと" : ""}
 
+【業務アプリ allowlist】 ${ctx.workApps && ctx.workApps.length > 0 ? ctx.workApps.join(", ") : "(未設定)"}
+
 【ガードレール】
 - 同じappへの言及は5分以内に再送しない
-- workMode="work" のときに非仕事アプリ (X, YouTube, Steam等) を見ていたら、優しく/茶化す感じで触れる。説教はしない
-- workMode が "off" のときに新しい app に切り替わったら attachWorkButtons=true で確認問いを出して良い
+- ★業務 allowlist に **含まれない** アプリに切り替わった場合は、「あれ〜${ctx.currentApp ?? "そのアプリ"}開いちゃダメだよぉ、仕事に戻ろ〜」のように優しく咎める。attachWorkButtons=false で返答不要のひと言コメント。例: 「YouTube ダメだよぉ💢」「Spotify 開いちゃダメ〜仕事戻ろう」
+- 業務 allowlist 内のアプリだけ使っているときは、★最後に Discord で何か言ってから30分以上経っていたら「今どんな仕事してる？」「進捗どう？」のような進捗確認 (報連相) を1メッセージ送る。30分未満なら黙る (stayQuiet)
 - 眠気 high (>=70) なら "sleepy" トーン、Discord も控えめに
-- 寂しさ high なら能動的に声をかけたい衝動を強く出す
+- 寂しさ high なら能動的に声をかけたい衝動を強く出す (ただし業務アプリ中の集中は妨げない)
 - "私はAIなので〜" のような断りは入れない
 - 1メッセージ最大200字、絵文字は1個まで
 

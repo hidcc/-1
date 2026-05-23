@@ -1,0 +1,15 @@
+{
+  "workApps": ["Code", "Terminal", "Google Chrome", "Slack"],
+  "discordTarget": "channel:1507610233894338710",
+  "tickMs": 60000,
+  "cooldownMs": 300000,
+  "nightStartHour": 0,
+  "nightEndHour": 7,
+  "reportEveryMs": 1800000,
+  "reportPrompts": [
+    "📋 今どんな仕事してる？教えて〜",
+    "📋 進捗どう？何やってる？",
+    "📋 今ちょっと報連相してくれる？何の作業中？",
+    "📋 サクッと共有して！今やってることは？"
+  ]
+}

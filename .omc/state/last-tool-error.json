@@ -1,7 +1,0 @@
-{
-  "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"echo \\\"=== /interactions エンドポイント疎通 ===\\\"\\ncurl -s -o /dev/null -w \\\"HTTP %{http_code}\\\\n\\\" -X POST \\\\\\n  -H \\\"x-signature-ed25519: 0000\\\" \\\\\\n  -H \\\"x-signature-timestamp: 0\\\" \\\\\\n  -H \\\"C...",
-  "error": "Exit code 6\n=== /interactions エンドポイント疎通 ===\nHTTP 000\n\n=== / (HTML) で疎通確認 ===\nHTTP 000",
-  "timestamp": "2026-05-23T05:33:18.246Z",
-  "retry_count": 1
-}

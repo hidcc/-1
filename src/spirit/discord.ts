@@ -1,44 +1,37 @@
-type DiscordConfig = {
-  botToken: string;
-  channelId: string;
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+
+const execFileP = promisify(execFile);
+
+type OpenclawConfig = {
+  channelId: string; // e.g. "1507610233894338710" (no "channel:" prefix)
 };
 
 export type DiscordMessage = {
   text: string;
+  // OpenClaw CLI does not currently propagate components; loop should append
+  // a text suffix when it wants the user to "answer" something (e.g. !work / !break).
+  // The `buttons` field is kept for type compatibility but ignored.
   buttons?: { label: string; customId: string; style: 1 | 2 | 3 | 4 }[];
 };
 
-type ApiMessage = {
-  id: string;
-};
-
-export async function postDiscord(cfg: DiscordConfig, msg: DiscordMessage): Promise<{ id: string }> {
-  const body: Record<string, unknown> = { content: msg.text };
-  if (msg.buttons && msg.buttons.length > 0) {
-    body.components = [
-      {
-        type: 1,
-        components: msg.buttons.map((b) => ({
-          type: 2,
-          style: b.style,
-          label: b.label,
-          custom_id: b.customId,
-        })),
-      },
-    ];
-  }
-  const res = await fetch(`https://discord.com/api/v10/channels/${cfg.channelId}/messages`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bot ${cfg.botToken}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`discord ${res.status}: ${text}`);
-  }
-  const data = (await res.json()) as ApiMessage;
-  return { id: data.id };
+export async function postDiscord(cfg: OpenclawConfig, msg: DiscordMessage): Promise<{ id: string }> {
+  await execFileP(
+    "openclaw",
+    [
+      "message",
+      "send",
+      "--channel",
+      "discord",
+      "--target",
+      `channel:${cfg.channelId}`,
+      "--message",
+      msg.text,
+    ],
+    { timeout: 15_000 },
+  );
+  // openclaw CLI doesn't expose the Discord message id in a parseable way here,
+  // so return a synthetic id. We no longer rely on the real id for button tracking
+  // because OpenClaw delivers button replies as inbound chat messages, not via webhook.
+  return { id: `openclaw-${Date.now()}` };
 }

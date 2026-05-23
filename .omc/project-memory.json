@@ -82,26 +82,26 @@
   "hotPaths": [
     {
       "path": "src/agent.ts",
-      "accessCount": 29,
-      "lastAccessed": 1779511943806,
+      "accessCount": 33,
+      "lastAccessed": 1779519478920,
       "type": "file"
     },
     {
       "path": "src/spirit/loop.ts",
-      "accessCount": 15,
-      "lastAccessed": 1779511948625,
+      "accessCount": 21,
+      "lastAccessed": 1779519050953,
+      "type": "file"
+    },
+    {
+      "path": "src/personality.ts",
+      "accessCount": 17,
+      "lastAccessed": 1779519723855,
       "type": "file"
     },
     {
       "path": "src/index.ts",
       "accessCount": 14,
       "lastAccessed": 1779511944426,
-      "type": "file"
-    },
-    {
-      "path": "src/personality.ts",
-      "accessCount": 14,
-      "lastAccessed": 1779511944930,
       "type": "file"
     },
     {
@@ -117,6 +117,12 @@
       "type": "file"
     },
     {
+      "path": ".env.local",
+      "accessCount": 7,
+      "lastAccessed": 1779516969446,
+      "type": "file"
+    },
+    {
       "path": "tsconfig.json",
       "accessCount": 6,
       "lastAccessed": 1779511354051,
@@ -129,15 +135,15 @@
       "type": "file"
     },
     {
-      "path": ".env.local",
-      "accessCount": 6,
-      "lastAccessed": 1779514670269,
-      "type": "file"
-    },
-    {
       "path": "src/spirit/workerClient.ts",
       "accessCount": 5,
       "lastAccessed": 1779511952478,
+      "type": "file"
+    },
+    {
+      "path": "src/spirit/discord.ts",
+      "accessCount": 5,
+      "lastAccessed": 1779518858567,
       "type": "file"
     },
     {
@@ -183,12 +189,6 @@
       "type": "file"
     },
     {
-      "path": "src/spirit/discord.ts",
-      "accessCount": 3,
-      "lastAccessed": 1779511949254,
-      "type": "file"
-    },
-    {
       "path": "src/spirit/tools.ts",
       "accessCount": 3,
       "lastAccessed": 1779511949668,
@@ -207,6 +207,12 @@
       "type": "file"
     },
     {
+      "path": "tools/openclaw-watcher/watcher.ts",
+      "accessCount": 3,
+      "lastAccessed": 1779518873109,
+      "type": "file"
+    },
+    {
       "path": "docs/superpowers/specs/2026-05-23-spirit-resident-design.md",
       "accessCount": 2,
       "lastAccessed": 1779511959062,
@@ -216,6 +222,12 @@
       "path": ".dev.vars",
       "accessCount": 2,
       "lastAccessed": 1779512357122,
+      "type": "file"
+    },
+    {
+      "path": "tools/openclaw-watcher/config.json",
+      "accessCount": 2,
+      "lastAccessed": 1779518126759,
       "type": "file"
     },
     {
