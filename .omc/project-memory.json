@@ -82,26 +82,26 @@
   "hotPaths": [
     {
       "path": "src/agent.ts",
-      "accessCount": 33,
-      "lastAccessed": 1779519478920,
+      "accessCount": 34,
+      "lastAccessed": 1779520217012,
       "type": "file"
     },
     {
       "path": "src/spirit/loop.ts",
-      "accessCount": 21,
-      "lastAccessed": 1779519050953,
+      "accessCount": 22,
+      "lastAccessed": 1779520082871,
       "type": "file"
     },
     {
       "path": "src/personality.ts",
-      "accessCount": 17,
-      "lastAccessed": 1779519723855,
+      "accessCount": 20,
+      "lastAccessed": 1779520465370,
       "type": "file"
     },
     {
       "path": "src/index.ts",
-      "accessCount": 14,
-      "lastAccessed": 1779511944426,
+      "accessCount": 16,
+      "lastAccessed": 1779521989759,
       "type": "file"
     },
     {
@@ -147,6 +147,12 @@
       "type": "file"
     },
     {
+      "path": "wrangler.toml",
+      "accessCount": 5,
+      "lastAccessed": 1779521972773,
+      "type": "file"
+    },
+    {
       "path": "docs/superpowers/plans/2026-05-23-spirit-resident.md",
       "accessCount": 4,
       "lastAccessed": 1779511499200,
@@ -162,12 +168,6 @@
       "path": "test/guards.test.ts",
       "accessCount": 4,
       "lastAccessed": 1779511952589,
-      "type": "file"
-    },
-    {
-      "path": "wrangler.toml",
-      "accessCount": 4,
-      "lastAccessed": 1779511957029,
       "type": "file"
     },
     {

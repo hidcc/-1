@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"wrangler --version && echo \\\"---WHOAMI---\\\" && wrangler whoami 2>&1 | head -20\",\"description\":\"Check wrangler version and auth\"}",
+  "error": "Exit code 127\n(eval):1: command not found: wrangler",
+  "timestamp": "2026-05-23T07:39:34.976Z",
+  "retry_count": 2
+}

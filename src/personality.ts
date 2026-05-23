@@ -284,9 +284,10 @@ ${obsLines}
    → 進捗確認はしない。
    → attachWorkButtons=false。返答不要のひと言。
 
-2. 上の判定が「✅ allowlist 内」で、最後に Discord で何か言ってから ${ctx.reportEveryMs ? Math.floor(ctx.reportEveryMs / 60000) : 30}分以上経過しているとき
-   → 「今どんな仕事してる？」「進捗どう？」のような進捗確認 (報連相) を1メッセージ送る。
-   → 30分未満なら stayQuiet で黙る。
+2. 上の判定が「✅ allowlist 内」のとき
+   → ${ctx.lastNotifiedAt > 0 ? `${Math.floor((Date.now() - ctx.lastNotifiedAt) / 60000)}分前に最後の発言あり` : "まだ何も発言してない"}
+   → **発言から30分未満なら必ず stayQuiet で黙る** (進捗確認も雑談も送ってはいけない)
+   → 30分以上経過していたら「今どんな仕事してる？」「進捗どう？」のような進捗確認 (報連相) を1メッセージ送る
 
    ★絶対に: 判定が「✅ allowlist 内」なら咎めない。Code, Terminal, Google Chrome, Slack のいずれかが currentApp の時は咎め文を送ってはいけない。
 
