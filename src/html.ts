@@ -207,37 +207,38 @@ const log = document.getElementById('log');
 const input = document.getElementById('input');
 const sendBtn = document.getElementById('send');
 
+// キーワード → { MP3音声, 再生する動画(省略可) } のマッピング
+const KEYWORD_AUDIO = [
+  { file: '/hungry.mp3', video: '/eat.mp4',
+    keywords: ['お腹', 'おなか', '空いた', 'ひもじ', '食べ', 'ごはん', '腹減', '腹ぺこ'] },
+  { file: '/full.mp3', video: null,
+    keywords: ['お腹いっぱい', 'もう食べられない', 'ごちそう', 'おいし', '美味し'] },
+  { file: '/sleepy.mp3', video: null,
+    keywords: ['眠い', 'ねむ', '疲れ', 'つかれ', '寝たい', 'うとうと', 'zzz'] },
+  { file: '/morning.mp3', video: null,
+    keywords: ['おはよ', '朝だ', 'おはようございます'] },
+];
+
 let currentAudio = null;
 let audioCtx = null;
 
-// ユーザー操作時に AudioContext をアンロックする
 function unlockAudio() {
   if (audioCtx) return;
   audioCtx = new AudioContext();
   audioCtx.resume().catch(() => {});
 }
 
-async function speak(text) {
-  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
-  try {
-    const res = await fetch('/tts', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text }),
-    });
-    if (!res.ok) {
-      const detail = await res.text();
-      console.error('TTS error:', res.status, detail);
+function playKeywordAudio(text) {
+  for (const entry of KEYWORD_AUDIO) {
+    if (entry.keywords.some(kw => text.includes(kw))) {
+      if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+      const audio = new Audio(entry.file);
+      currentAudio = audio;
+      audio.onended = () => { currentAudio = null; };
+      audio.play().catch(() => {});
+      if (entry.video) playOneShot(entry.video);
       return;
     }
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    const audio = new Audio(url);
-    currentAudio = audio;
-    audio.onended = () => { URL.revokeObjectURL(url); currentAudio = null; };
-    await audio.play();
-  } catch (e) {
-    console.error('speak error:', e);
   }
 }
 
@@ -248,7 +249,7 @@ function addMsg(role, text) {
   div.textContent = prefix + ': ' + text;
   log.appendChild(div);
   log.scrollTop = log.scrollHeight;
-  if (role === 'agent' || role === 'push') speak(text);
+  if (role === 'agent' || role === 'push') playKeywordAudio(text);
 }
 
 function updateVisualState(_state) { /* no-op */ }
@@ -305,7 +306,7 @@ async function action(path) {
     const d = await r.json();
     if (d.reply) addMsg('agent', d.reply);
     if (d.state) updateStats(d.state);
-    if (path === '/feed') playOneShot('/after-meal.mp4');
+    if (path === '/feed') playOneShot('/eat.mp4');
   } catch (_) { /* ignore */ }
 }
 

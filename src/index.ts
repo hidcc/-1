@@ -10,7 +10,6 @@ type Env = {
   AGENT: DurableObjectNamespace;
   SPIRIT_SECRET: string;
   DISCORD_PUBLIC_KEY: string;
-  ELEVENLABS_API_KEY: string;
 };
 
 const PROXY_PATHS = new Set(["/chat", "/feed", "/nap", "/state"]);
@@ -81,41 +80,6 @@ export default {
       return Response.json({
         type: 7,
         data: { content: result.content, components: [] },
-      });
-    }
-
-    if (url.pathname === "/tts" && req.method === "POST") {
-      const { text } = await req.json<{ text: string }>();
-      if (!text) return new Response("missing text", { status: 400 });
-
-      const VOICE_ID = "EXAVITQu4vr4xnSDxMaL"; // Domi — strong mature female (free tier)
-      const elRes = await fetch(
-        `https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`,
-        {
-          method: "POST",
-          headers: {
-            "xi-api-key": env.ELEVENLABS_API_KEY,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            text,
-            model_id: "eleven_multilingual_v2",
-            voice_settings: {
-              stability: 0.25,
-              similarity_boost: 0.85,
-              style: 0.55,
-              use_speaker_boost: true,
-            },
-          }),
-        },
-      );
-      if (!elRes.ok) {
-        const detail = await elRes.text();
-        console.error("ElevenLabs error", elRes.status, detail);
-        return new Response(`tts error: ${elRes.status} ${detail}`, { status: 502 });
-      }
-      return new Response(elRes.body, {
-        headers: { "Content-Type": "audio/mpeg" },
       });
     }
 
