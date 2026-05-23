@@ -24,7 +24,7 @@ try {
 }
 
 const DEBUG = process.env.DEBUG === "1";
-const TICK_MS = DEBUG ? 10_000 : 60_000;
+const TICK_MS = DEBUG ? 10_000 : 30_000;  // 30秒tick: 短時間のアプリ切替も捉えやすく
 const MODEL = "gpt-4o-mini";
 
 const cfg = {
