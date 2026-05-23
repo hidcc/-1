@@ -73,8 +73,10 @@ export class AgentSoul {
 
   private async ensureLoaded(): Promise<void> {
     if (this.loaded) return;
-    const stored = await this.ctx.storage.get<AgentState>("s");
-    this.state = stored ?? structuredClone(DEFAULT_STATE);
+    const stored = await this.ctx.storage.get<Partial<AgentState>>("s");
+    // Merge defaults so newly-added fields (e.g. recentObservations) are present
+    // even when the persisted state predates the schema extension.
+    this.state = { ...structuredClone(DEFAULT_STATE), ...(stored ?? {}) };
     this.loaded = true;
   }
 
