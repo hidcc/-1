@@ -207,7 +207,7 @@ async function action(path) {
 }
 
 sendBtn.addEventListener('click', send);
-input.addEventListener('keydown', (e) => { if (e.key === 'Enter') send(); });
+input.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.isComposing) send(); });
 document.getElementById('feed').addEventListener('click', () => action('/feed'));
 document.getElementById('nap').addEventListener('click', () => action('/nap'));
 
