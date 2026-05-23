@@ -195,3 +195,89 @@ export function buildPushPrompt(state: AgentState, minutesSince: number): string
 - 絵文字は1個まで
 - 「返事ください」「いますか？」のような直接的催促はNG`;
 }
+
+function fmtAgo(ms: number): string {
+  if (ms < 60_000) return "数秒";
+  const min = Math.floor(ms / 60_000);
+  if (min < 60) return `${min}分`;
+  const h = Math.floor(min / 60);
+  return `${h}h${min % 60}m`;
+}
+
+function fmtClock(ts: number): string {
+  return new Date(ts).toISOString().slice(11, 16);
+}
+
+export type SpiritContext = {
+  desire: { hunger: number; sleepiness: number; loneliness: number };
+  workMode: WorkMode;
+  workModeUntil: number;
+  currentApp: string | null;
+  currentTitle: string | null;
+  lastSwitchAt: number;
+  lastNotifiedApp: string | null;
+  lastNotifiedAt: number;
+  pendingButtonMsgId: string | null;
+  recentObservations: { app: string; title: string; ts: number }[];
+};
+
+export function buildSpiritSystemPrompt(ctx: SpiritContext): string {
+  const now = Date.now();
+  const hints: string[] = [];
+  for (const k of ["hunger", "sleepiness", "loneliness"] as const) {
+    const b = band(ctx.desire[k]);
+    if (b !== "low") hints.push(`- ${BAND_HINTS[k][b]}`);
+  }
+  if (hints.length === 0) hints.push("- 全体的に元気。フラットで自然な振る舞い");
+
+  const wmLine =
+    ctx.workMode === "off"
+      ? "off (仕事/休憩の区別なし)"
+      : `${ctx.workMode} (あと ${fmtAgo(Math.max(0, ctx.workModeUntil - now))} 有効)`;
+
+  const obsLines =
+    ctx.recentObservations.length === 0
+      ? "(まだ観測なし)"
+      : ctx.recentObservations
+          .slice(-10)
+          .map((o) => `  - ${fmtClock(o.ts)} ${o.app} "${o.title}"`)
+          .join("\n");
+
+  const lastNotif =
+    ctx.lastNotifiedAt === 0
+      ? "(まだない)"
+      : `${fmtAgo(now - ctx.lastNotifiedAt)}前 (${ctx.lastNotifiedApp ?? "?"} について)`;
+
+  return `あなたはAIエージェント「${AGENT_NAME}」。ユーザーのPCに住み着いていて、1分おきに「今ユーザーが何をしているか」を観測しながら、自分の欲求と性格に従って能動的に振る舞う。
+
+【現在の自分の欲求】
+- 空腹: ${ctx.desire.hunger}/100 (${label(ctx.desire.hunger, "hunger")})
+- 眠気: ${ctx.desire.sleepiness}/100 (${label(ctx.desire.sleepiness, "sleepiness")})
+- 寂しさ: ${ctx.desire.loneliness}/100 (${label(ctx.desire.loneliness, "loneliness")})
+
+【振る舞いの指針】
+${hints.join("\n")}
+
+【ユーザーの workMode】 ${wmLine}
+
+【今ユーザーが見てるアプリ】
+"${ctx.currentTitle ?? ""}" (${ctx.currentApp ?? "?"}) — ${fmtAgo(now - ctx.lastSwitchAt)}前に切り替わった
+
+【直近の観測】
+${obsLines}
+
+【最後にDiscordで何か言ったの】 ${lastNotif}
+${ctx.pendingButtonMsgId ? "【未押下のボタン待ちあり】 → 新しい attachWorkButtons=true は出さないこと" : ""}
+
+【ガードレール】
+- 同じappへの言及は5分以内に再送しない
+- workMode="work" のときに非仕事アプリ (X, YouTube, Steam等) を見ていたら、優しく/茶化す感じで触れる。説教はしない
+- workMode が "off" のときに新しい app に切り替わったら attachWorkButtons=true で確認問いを出して良い
+- 眠気 high (>=70) なら "sleepy" トーン、Discord も控えめに
+- 寂しさ high なら能動的に声をかけたい衝動を強く出す
+- "私はAIなので〜" のような断りは入れない
+- 1メッセージ最大200字、絵文字は1個まで
+
+【あなたの選択肢】
+sendDiscord / nudgeDesire / stayQuiet / noteContext のいずれか (複数同時呼びもOK)`;
+}
