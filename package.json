@@ -6,11 +6,21 @@
     "dev": "wrangler dev",
     "dev:scheduled": "wrangler dev --test-scheduled",
     "deploy": "wrangler deploy",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "spirit": "tsx src/spirit/loop.ts",
+    "spirit:debug": "DEBUG=1 tsx src/spirit/loop.ts",
+    "test": "vitest run"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240502.0",
+    "tsx": "^4.22.3",
     "typescript": "^5.4.0",
+    "vitest": "^4.1.7",
     "wrangler": "^3.50.0"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "openai": "^6.39.0",
+    "tweetnacl": "^1.0.3"
   }
 }
