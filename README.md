@@ -59,6 +59,9 @@ tsconfig.json
 
 ## セットアップ
 
+> **重要:** `OPENAI_API_KEY` を環境変数として設定してください。API キーをコードやリポジトリに直接記載しないでください。  
+> ローカル開発は `.dev.vars`（Worker）または `.env.local`（spirit loop）に記載し、`.env.example` を参考に設定してください。
+
 ### 1. 依存インストール
 
 ```bash
