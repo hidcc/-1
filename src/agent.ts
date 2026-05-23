@@ -116,6 +116,8 @@ export class AgentSoul {
         return new Response("method not allowed", { status: 405 });
       case "/spirit/act":
         return this.handleSpiritAct(req);
+      case "/workmode":
+        return this.handleWorkMode(req);
       default:
         return new Response("not found", { status: 404 });
     }
@@ -315,6 +317,26 @@ export class AgentSoul {
         return new Response("unknown kind", { status: 400 });
     }
 
+    await this.save();
+    return Response.json({ ok: true });
+  }
+
+  private async handleWorkMode(req: Request): Promise<Response> {
+    let body: { mode?: unknown; until?: unknown; clearPendingButton?: unknown };
+    try {
+      body = (await req.json()) as typeof body;
+    } catch {
+      return new Response("invalid json", { status: 400 });
+    }
+    const mode = body.mode === "work" || body.mode === "break" || body.mode === "off" ? body.mode : null;
+    const until = typeof body.until === "number" ? body.until : 0;
+    if (!mode) return new Response("invalid mode", { status: 400 });
+
+    this.state.workMode = mode;
+    this.state.workModeUntil = until;
+    if (body.clearPendingButton === true) {
+      this.state.pendingButtonMsgId = null;
+    }
     await this.save();
     return Response.json({ ok: true });
   }
