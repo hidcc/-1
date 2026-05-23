@@ -159,6 +159,12 @@
       "type": "file"
     },
     {
+      "path": ".env.local",
+      "accessCount": 4,
+      "lastAccessed": 1779512712774,
+      "type": "file"
+    },
+    {
       "path": "README.md",
       "accessCount": 3,
       "lastAccessed": 1779511883910,
@@ -207,6 +213,12 @@
       "type": "file"
     },
     {
+      "path": ".dev.vars",
+      "accessCount": 2,
+      "lastAccessed": 1779512357122,
+      "type": "file"
+    },
+    {
       "path": "src/html.ts",
       "accessCount": 1,
       "lastAccessed": 1779506983430,
@@ -216,18 +228,6 @@
       "path": "src/openai.ts",
       "accessCount": 1,
       "lastAccessed": 1779506984901,
-      "type": "file"
-    },
-    {
-      "path": ".dev.vars",
-      "accessCount": 1,
-      "lastAccessed": 1779510432453,
-      "type": "file"
-    },
-    {
-      "path": ".env.local",
-      "accessCount": 1,
-      "lastAccessed": 1779510788425,
       "type": "file"
     }
   ],
