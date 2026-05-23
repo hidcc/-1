@@ -81,27 +81,129 @@
   },
   "hotPaths": [
     {
-      "path": "README.md",
-      "accessCount": 1,
-      "lastAccessed": 1779506978789,
+      "path": "src/agent.ts",
+      "accessCount": 29,
+      "lastAccessed": 1779511943806,
+      "type": "file"
+    },
+    {
+      "path": "src/spirit/loop.ts",
+      "accessCount": 15,
+      "lastAccessed": 1779511948625,
+      "type": "file"
+    },
+    {
+      "path": "src/index.ts",
+      "accessCount": 14,
+      "lastAccessed": 1779511944426,
+      "type": "file"
+    },
+    {
+      "path": "src/personality.ts",
+      "accessCount": 14,
+      "lastAccessed": 1779511944930,
       "type": "file"
     },
     {
       "path": "package.json",
-      "accessCount": 1,
-      "lastAccessed": 1779506979052,
+      "accessCount": 8,
+      "lastAccessed": 1779511623271,
+      "type": "file"
+    },
+    {
+      "path": "src/spirit/tsconfig.json",
+      "accessCount": 8,
+      "lastAccessed": 1779511957416,
+      "type": "file"
+    },
+    {
+      "path": "tsconfig.json",
+      "accessCount": 6,
+      "lastAccessed": 1779511354051,
+      "type": "file"
+    },
+    {
+      "path": "src/auth.ts",
+      "accessCount": 6,
+      "lastAccessed": 1779511943853,
+      "type": "file"
+    },
+    {
+      "path": "src/spirit/workerClient.ts",
+      "accessCount": 5,
+      "lastAccessed": 1779511952478,
+      "type": "file"
+    },
+    {
+      "path": "docs/superpowers/plans/2026-05-23-spirit-resident.md",
+      "accessCount": 4,
+      "lastAccessed": 1779511499200,
+      "type": "file"
+    },
+    {
+      "path": "src/spirit/observe.ts",
+      "accessCount": 4,
+      "lastAccessed": 1779511952443,
+      "type": "file"
+    },
+    {
+      "path": "test/guards.test.ts",
+      "accessCount": 4,
+      "lastAccessed": 1779511952589,
       "type": "file"
     },
     {
       "path": "wrangler.toml",
-      "accessCount": 1,
-      "lastAccessed": 1779506979306,
+      "accessCount": 4,
+      "lastAccessed": 1779511957029,
       "type": "file"
     },
     {
-      "path": "src/agent.ts",
-      "accessCount": 1,
-      "lastAccessed": 1779506983088,
+      "path": "README.md",
+      "accessCount": 3,
+      "lastAccessed": 1779511883910,
+      "type": "file"
+    },
+    {
+      "path": "src/interactions.ts",
+      "accessCount": 3,
+      "lastAccessed": 1779511944697,
+      "type": "file"
+    },
+    {
+      "path": "src/spirit/guards.ts",
+      "accessCount": 3,
+      "lastAccessed": 1779511949240,
+      "type": "file"
+    },
+    {
+      "path": "src/spirit/discord.ts",
+      "accessCount": 3,
+      "lastAccessed": 1779511949254,
+      "type": "file"
+    },
+    {
+      "path": "src/spirit/tools.ts",
+      "accessCount": 3,
+      "lastAccessed": 1779511949668,
+      "type": "file"
+    },
+    {
+      "path": "src/spirit/localCache.ts",
+      "accessCount": 3,
+      "lastAccessed": 1779511952499,
+      "type": "file"
+    },
+    {
+      "path": "test/interactions.test.ts",
+      "accessCount": 3,
+      "lastAccessed": 1779511952605,
+      "type": "file"
+    },
+    {
+      "path": "docs/superpowers/specs/2026-05-23-spirit-resident-design.md",
+      "accessCount": 2,
+      "lastAccessed": 1779511959062,
       "type": "file"
     },
     {
@@ -111,21 +213,21 @@
       "type": "file"
     },
     {
-      "path": "src/personality.ts",
-      "accessCount": 1,
-      "lastAccessed": 1779506984118,
-      "type": "file"
-    },
-    {
-      "path": "src/index.ts",
-      "accessCount": 1,
-      "lastAccessed": 1779506984489,
-      "type": "file"
-    },
-    {
       "path": "src/openai.ts",
       "accessCount": 1,
       "lastAccessed": 1779506984901,
+      "type": "file"
+    },
+    {
+      "path": ".dev.vars",
+      "accessCount": 1,
+      "lastAccessed": 1779510432453,
+      "type": "file"
+    },
+    {
+      "path": ".env.local",
+      "accessCount": 1,
+      "lastAccessed": 1779510788425,
       "type": "file"
     }
   ],
