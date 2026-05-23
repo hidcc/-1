@@ -214,7 +214,7 @@ const KEYWORD_AUDIO = [
   { file: '/full.mp3', video: null,
     keywords: ['お腹いっぱい', 'もう食べられない', 'ごちそう', 'おいし', '美味し'] },
   { file: '/sleepy.mp3', video: null,
-    keywords: ['眠い', 'ねむ', '疲れ', 'つかれ', '寝たい', 'うとうと', 'zzz'] },
+    keywords: ['眠い', 'ねむ', '疲れ', 'つかれ', '寝たい','眠たい', 'うとうと', 'zzz'] },
   { file: '/morning.mp3', video: null,
     keywords: ['おはよ', '朝だ', 'おはようございます'] },
 ];
